@@ -1,4 +1,4 @@
-# $Id: NSNormalise.pm,v 1.4 2002/10/10 21:36:56 grantm Exp $
+# $Id: NSNormalise.pm,v 1.5 2002/10/11 02:01:43 grantm Exp $
 
 package XML::Filter::NSNormalise;
 
@@ -10,7 +10,7 @@ use XML::SAX::Base;
 
 use vars qw($VERSION @ISA);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 @ISA = qw(XML::SAX::Base);
 

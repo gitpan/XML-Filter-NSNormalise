@@ -1,4 +1,4 @@
-# $Id: 2_more.t,v 1.3 2002/10/10 21:36:13 grantm Exp $
+# $Id: 2_more.t,v 1.4 2002/10/11 02:00:46 grantm Exp $
 ##############################################################################
 # These tests require a functional XML::SAX installation
 #
@@ -63,6 +63,7 @@ ok(ref($filter), 'Created a filter object');
 my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
 ok(ref($p), 'Created a parser object');
 
+$@ = '';
 eval {$p->parse_string(q{
   <rdf:RDF
    xmlns="http://purl.org/rss/1.0/"
@@ -72,7 +73,7 @@ eval {$p->parse_string(q{
   </rdf:RDF>
   });
 };
-ok(!$@, 'Parsed with no errors');
+is($@, '', 'Parsed with no errors');
 
 ok($xml =~ s{xmlns=('|")http://purl\.org/rss/1\.0/\1}{ATTR},
    "Default namespace declaration untouched");
@@ -83,7 +84,7 @@ ok($xml =~ s{xmlns:rdf=('|")http://www.w3.org/1999/02/22-rdf-syntax-ns#\1}{ATTR}
 ok($xml =~ s{xmlns:dc=('|")http://purl.org/dc/elements/1.1/\1}{ATTR},
    "DC namespace declaration mapped successfully");
 
-ok($xml =~ m{
+like($xml, qr{
   ^\s*                               # optional leading whitespace
   <rdf:RDF\s+ATTR\s+ATTR\s+ATTR      # root element with three ns attrs
    \s*>                              # end the tag
@@ -110,6 +111,7 @@ $filter = XML::Filter::NSNormalise->new(
 
 my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
 
+$@ = '';
 eval {$p->parse_string(q{
   <doc xmlns:alpha="companya.com" xmlns:beta="companyb.com">
     <ignore>Does nothing</ignore>
@@ -118,7 +120,7 @@ eval {$p->parse_string(q{
   </doc>
   });
 };
-ok(!$@, 'Parsed namespaced attributes with no errors');
+is($@, '', 'Parsed namespaced attributes with no errors');
 
 ok($xml =~ s{xmlns:a=('|")companya.com\1}{ATTR},
    "Company A namespace declaration mapped successfully");
@@ -136,7 +138,7 @@ ok($xml =~ s{\s+id=('|")2\1}{ ATTR_B}, "Company B bare attribute unscathed");
 ok($xml =~ s{\s+b:align=('|")right\1}{ ATTR_B},
    "Company B namespaced attribute mapped successfully");
 
-ok($xml =~ m{
+like($xml, qr{
   ^\s*                                # optional leading whitespace
   <doc\s+ATTR\s+ATTR\s*>              # root element with two ns attrs
    \s+<ignore>Does\snothing</ignore>  # innocent bystander
@@ -164,6 +166,7 @@ $filter = XML::Filter::NSNormalise->new(
 
 my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
 
+$@ = '';
 eval {$p->parse_string(q{
   <doc xmlns:alpha="companya.com" xmlns:a="aardvark.com">
     <alpha:para>paragraph one</alpha:para>
@@ -172,7 +175,7 @@ eval {$p->parse_string(q{
   });
 };
 
-ok($@ =~ /Cannot map 'companya\.com' to 'a' - prefix already occurs in document/, 
+like($@, qr/Cannot map 'companya\.com' to 'a' - prefix already occurs in document/, 
    'Caught attempt to map to a used prefix');
 
 
@@ -193,6 +196,7 @@ $filter = XML::Filter::NSNormalise->new(
 
 my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
 
+$@ = '';
 eval {$p->parse_string(q{
   <doc xmlns:a="companya.com" xmlns:aa="aardvark.com">
     <a:para>paragraph one</a:para>
@@ -201,7 +205,7 @@ eval {$p->parse_string(q{
   });
 };
 
-ok(!$@, 'Mapping to same prefix succeeded');
+is($@, '', 'Mapping to same prefix succeeded');
 
 ok($xml =~ s{xmlns:a=('|")companya.com\1}{ATTR},
    "Original 'a' prefix declaration mapped successfully to itself");
@@ -209,7 +213,7 @@ ok($xml =~ s{xmlns:a=('|")companya.com\1}{ATTR},
 ok($xml =~ s{xmlns:aa=('|")aardvark.com\1}{ATTR},
    "Original 'aa' prefix declaration survived unscathed");
 
-ok($xml =~ m{
+like($xml, qr{
   ^\s*                                # optional leading whitespace
   <doc\s+ATTR\s+ATTR\s*>              # root element with two ns attrs
    \s+<a:para\s*>paragraph\sone</a:para>
@@ -236,13 +240,14 @@ $filter = XML::Filter::NSNormalise->new(
 
 my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
 
+$@ = '';
 eval {$p->parse_string(q{
   <doc xmlns="companya.com">
     <para>paragraph one</para>
   </doc>
   });
 };
-ok(!$@, 'Parsed mapped default namespace with no errors');
+is($@, '', 'Parsed mapped default namespace with no errors');
 
 ok($xml =~ s{xmlns=('|")companya.com\1}{ATTR},
    "Default namespace declaration mapped successfully");
@@ -250,7 +255,7 @@ ok($xml =~ s{xmlns=('|")companya.com\1}{ATTR},
 ok($xml =~ s{xmlns:a=('|")companya.com\1}{ATTR},
    "Explicit namespace prefix declaration added");
 
-ok($xml =~ m{
+like($xml, qr{
   ^\s*                                  # optional leading whitespace
   <a:doc\s+ATTR\s+ATTR\s*>              # root element with two ns attrs
    \s+<a:para\s*>paragraph\sone</a:para>
@@ -276,6 +281,7 @@ $filter = XML::Filter::NSNormalise->new(
 
 my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
 
+$@ = '';
 eval {$p->parse_string(q{
   <doc xmlns="companya.com">
     <para>paragraph one</para>
@@ -288,7 +294,7 @@ eval {$p->parse_string(q{
   </doc>
   });
 };
-ok(!$@, 'Parsed nested default namespaces with no errors');
+is($@, '', 'Parsed nested default namespaces with no errors');
 
 ok($xml =~ s{xmlns=('|")companya.com\1}{ATTR_A},
    "Default namespace declaration mapped successfully");
@@ -304,9 +310,8 @@ ok($xml =~ s{xmlns:b=('|")companyb.com\1}{ATTR_B},
 
 ok($xml =~ s{xmlns=('|")companyc.com\1}{ATTR_C},
    "Default namespace declaration mapped successfully");
-#print "$xml\n";
 
-ok($xml =~ m{
+like($xml, qr{
   ^\s*                                      # optional leading whitespace
   <a:doc\s+ATTR_A\s+ATTR_A\s*>              # root element with two ns attrs
    \s+<a:para\s*>paragraph\sone</a:para>
