@@ -1,4 +1,7 @@
-# $Id: 1_basic.t,v 1.1.1.1 2002/10/09 02:25:33 grantm Exp $
+# $Id: 1_basic.t,v 1.2 2002/10/10 21:36:13 grantm Exp $
+##############################################################################
+# Very basic tests that do not rely on XML::SAX being installed correctly.
+#
 
 use strict;
 use Test::More tests => 6;

@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Filter::NSNormalise.
 
+0.03  Fri Oct 11
+	- added dependency on XML::NamespaceSupport 1.08
+	- skip tests which rely on XML::SAX if it doesn't work
+
 0.02  Thu Oct 10
 	- added xmlnsnorm command-line utility
 	- fixed fatal error on mapping to the same prefix the document already uses

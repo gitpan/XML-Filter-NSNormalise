@@ -6,8 +6,9 @@ WriteMakefile(
     'NAME'            => 'XML::Filter::NSNormalise',
     'VERSION_FROM'    => 'lib/XML/Filter/NSNormalise.pm',
     'PREREQ_PM'       => {
-                           Test::Simple       => 0.41,
-			   XML::SAX           => undef,
+                           Test::Simple          => 0.41,
+			   XML::SAX              => undef,
+			   XML::NamespaceSupport => 1.08,
                          },
     'EXE_FILES'       => [ qw(bin/xmlnsnorm) ],
     ($] >= 5.005 ?  (

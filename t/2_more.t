@@ -1,4 +1,7 @@
-# $Id: 2_more.t,v 1.2 2002/10/09 23:06:08 grantm Exp $
+# $Id: 2_more.t,v 1.3 2002/10/10 21:36:13 grantm Exp $
+##############################################################################
+# These tests require a functional XML::SAX installation
+#
 
 use strict;
 use Test::More;
@@ -11,6 +14,18 @@ BEGIN { # Seems to be required by older Perls
 
   unless(eval { require XML::SAX::ParserFactory }) {
     plan skip_all => 'XML::SAX::ParserFactory not installed';
+  }
+
+  # Test SAX installation
+
+  eval {
+    my $xml = '';
+    my $writer = XML::SAX::Writer->new(Output => \$xml);
+    my $parser = XML::SAX::ParserFactory->parser(Handler => $writer);
+    $parser->parse_string('<doc>text</doc>');
+  };
+  if($@) {
+    plan skip_all => "XML::SAX is not installed correctly: $@";
   }
 
 }
