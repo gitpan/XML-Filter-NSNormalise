@@ -1,4 +1,4 @@
-# $Id: 2_more.t,v 1.1.1.1 2002/10/09 02:25:33 grantm Exp $
+# $Id: 2_more.t,v 1.2 2002/10/09 23:06:08 grantm Exp $
 
 use strict;
 use Test::More;
@@ -15,7 +15,7 @@ BEGIN { # Seems to be required by older Perls
 
 }
 
-plan tests => 28;
+plan tests => 32;
 
 $^W = 1;
 
@@ -159,6 +159,50 @@ eval {$p->parse_string(q{
 
 ok($@ =~ /Cannot map 'companya\.com' to 'a' - prefix already occurs in document/, 
    'Caught attempt to map to a used prefix');
+
+
+##############################################################################
+# Try mapping a URI to the same prefix which is already used and ensure that it
+# all still works.
+#
+
+$xml = '';
+$writer = XML::SAX::Writer->new(Output => \$xml);
+
+$filter = XML::Filter::NSNormalise->new(
+  Map => {
+    'companya.com' => 'a',
+  },
+  Handler => $writer,
+);
+
+my $p = XML::SAX::ParserFactory->parser(Handler => $filter);
+
+eval {$p->parse_string(q{
+  <doc xmlns:a="companya.com" xmlns:aa="aardvark.com">
+    <a:para>paragraph one</a:para>
+    <aa:para>paragraph two</aa:para>
+  </doc>
+  });
+};
+
+ok(!$@, 'Mapping to same prefix succeeded');
+
+ok($xml =~ s{xmlns:a=('|")companya.com\1}{ATTR},
+   "Original 'a' prefix declaration mapped successfully to itself");
+
+ok($xml =~ s{xmlns:aa=('|")aardvark.com\1}{ATTR},
+   "Original 'aa' prefix declaration survived unscathed");
+
+ok($xml =~ m{
+  ^\s*                                # optional leading whitespace
+  <doc\s+ATTR\s+ATTR\s*>              # root element with two ns attrs
+   \s+<a:para\s*>paragraph\sone</a:para>
+   \s+<aa:para\s*>paragraph\stwo</aa:para>
+   \s+</doc\s*>
+   \s*$
+}xs, "Resulting document unchanged");
+
 
 
 ##############################################################################

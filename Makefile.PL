@@ -9,6 +9,7 @@ WriteMakefile(
                            Test::Simple       => 0.41,
 			   XML::SAX           => undef,
                          },
+    'EXE_FILES'       => [ qw(bin/xmlnsnorm) ],
     ($] >= 5.005 ?  (
       AUTHOR        => 'Grant McLean <grantm@cpan.org>',
       ABSTRACT_FROM => 'lib/XML/Filter/NSNormalise.pm',

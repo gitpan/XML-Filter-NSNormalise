@@ -1,4 +1,4 @@
-# $Id: NSNormalise.pm,v 1.2 2002/10/09 02:31:58 grantm Exp $
+# $Id: NSNormalise.pm,v 1.3 2002/10/09 23:06:08 grantm Exp $
 
 package XML::Filter::NSNormalise;
 
@@ -10,7 +10,7 @@ use XML::SAX::Base;
 
 use vars qw($VERSION @ISA);
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 @ISA = qw(XML::SAX::Base);
 
@@ -96,8 +96,10 @@ sub start_element {
 
     if($attr->{Prefix} eq 'xmlns') {
       if($self->{ReverseMap}->{$attr->{LocalName}}) {
-        die "Cannot map '$self->{ReverseMap}->{$attr->{LocalName}}' to " .
-	    "'$attr->{LocalName}' - prefix already occurs in document";
+        if($attr->{Value} ne $self->{ReverseMap}->{$attr->{LocalName}}) {
+	  die "Cannot map '$self->{ReverseMap}->{$attr->{LocalName}}' to " .
+	      "'$attr->{LocalName}' - prefix already occurs in document";
+        }
       }
       if($self->{Map}->{$attr->{Value}}) {
 	$attr = { %$attr };
@@ -182,7 +184,7 @@ For example, feeding this document...
 ... through this filter ...
 
   XML::Filter::NSNormalise->new(
-    Map => {=20
+    Map => {
       'http://purl.org/dc/elements/1.1/' => 'dc'
     }
   )
@@ -196,7 +198,15 @@ For example, feeding this document...
     <dc:date>2002-10-08</dc:date>
   </rdf:RDF>
 
-You can specify more than one namespace URI to prefix mapping.
+You can specify more than one namespace URI to prefix mapping, eg:
+
+  XML::Filter::NSNormalise->new(
+    Map => {
+      'http://purl.org/dc/elements/1.1/' => 'dc',
+      'http://www.w3.org/1999/02/22-rdf-syntax-ns#' => 'rdf',
+      'http://purl.org/rss/1.0/modules/syndication/' => 'syn'
+    }
+  )
 
 =head1 METHODS
 
@@ -214,10 +224,18 @@ All other options are passed to the default constructor in L<XML::SAX::Base>.
 =head1 ERROR HANDLING
 
 Attempting to map more than one URI to the same prefix will cause a fatal
-exception.
+exception, eg:
+
+  XML::Filter::NSNormalise->new(
+    Map => {
+      'http://x.com/ => 'z',
+      'http://y.com/ => 'z'
+    }
+  )
 
 Attempting to map a URI to a prefix that is already mapped to a different URI
-will cause a fatal exception.
+will cause a fatal exception (eg: you map a URI to the prefix 'foo' but the
+document your are filtering already uses 'foo' for a different URI).
 
 =head1 SEE ALSO
 
