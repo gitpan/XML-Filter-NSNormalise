@@ -1,0 +1,11 @@
+Revision history for Perl extension XML::Filter::NSNormalise.
+
+0.01  Wed Oct  9 10:00:44 2002
+	- first release to CPAN
+	- added tests
+	- added POD
+	- added support for mapping prefixes on attributes
+	- fixed end_element handler not mapping 'Name'
+	- original version; created by h2xs 1.21 with options
+		-AX -n XML::Filter::NSNormalise
+
